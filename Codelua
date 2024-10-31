@@ -1,0 +1,60 @@
+local oyuncu = script.Parent
+parts = oyuncu:GetDescendants()
+
+getpart = {}
+
+for _,v in pairs(parts) do
+	if v:IsA("BasePart") then
+		v.Touched:Connect(function(hit)
+			
+			local plrparts = script.Parent:GetDescendants()
+			for _,v in pairs(plrparts) do
+				if hit.Name == v.Name then
+					return
+				end
+			end
+			local velocity = hit.AssemblyLinearVelocity.Magnitude >= 50 or hit.Velocity.Magnitude >= 50
+			if velocity then
+				
+				for _,v in pairs(getpart) do
+					if v == hit then
+							return
+						end
+				end
+				local hum = oyuncu:FindFirstChild("Humanoid")
+				local fark = math.max(hit.AssemblyLinearVelocity.Magnitude, hit.Velocity.Magnitude) - 50
+				local normalmultipler = 1
+				local multiplerhasar = 25
+				local hasarpl = fark / multiplerhasar
+				local ekstrahasar = hasarpl + normalmultipler
+				local hasar = ekstrahasar * multiplerhasar
+				if hum and hum:IsA("Humanoid") then
+					hum.BreakJointsOnDeath = false
+					hum.RequiresNeck = false
+					for _,v in pairs(parts) do
+						if v:IsA("Motor6D") then
+							local p0 = v.Part0
+							local p1 = v.Part1
+							local c0 ,c1 = v.C0 , v.C1
+							v.Enabled = false
+							local ball = Instance.new("BallSocketConstraint",p0)
+							local att = Instance.new("Attachment",p1)
+							local att2 = Instance.new("Attachment",v.Parent)
+							att.CFrame = c0
+							att2.CFrame = c1
+							ball.Attachment0 = att
+							ball.Attachment1 = att2
+						end
+						table.insert(getpart,hit)
+					end
+					hum.Health = hum.Health - hasar
+				end
+			end 
+			
+			wait(0.7)
+			table.clear(getpart)	
+		end)
+			
+	end
+	
+end
